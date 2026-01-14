@@ -23,6 +23,7 @@ public interface CategoryMapper {
 
     UpdateBudgetDto toLocalDto(UpdateBudgetRequest request, UUID categoryId, UUID userId);
 
+    @Mapping(target = "isBudgetExceeded", expression = "java(category.isBudgetExceeded())")
     CategoryResponse toApiResponse(Category category);
 
     @Mapping(target = "isBudgetExceeded", expression = "java(category.isBudgetExceeded())")

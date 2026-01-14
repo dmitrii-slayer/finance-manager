@@ -571,6 +571,17 @@ components:
           example: "Транспорт"
         type:
           $ref: '#/components/schemas/TransactionTypeEnum'
+        budgetLimit:
+          type: number
+          format: double
+        budgetSpent:
+          type: number
+          format: double
+        remainingBudget:
+          type: number
+          format: double
+        isBudgetExceeded:
+          type: boolean
 
     CategoryDetailedResponse:
       type: object
