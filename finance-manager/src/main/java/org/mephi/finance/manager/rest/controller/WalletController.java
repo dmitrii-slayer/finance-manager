@@ -12,6 +12,7 @@ import org.mephi.finance.manager.model.TransferRequest;
 import org.mephi.finance.manager.model.TransferResponse;
 import org.mephi.finance.manager.model.WalletResponse;
 import org.mephi.finance.manager.service.CurrentUserService;
+import org.mephi.finance.manager.service.WalletSearchService;
 import org.mephi.finance.manager.service.WalletService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -29,12 +30,14 @@ public class WalletController implements WalletApi {
     private final WalletMapper walletMapper;
     private final CurrentUserService currentUserService;
 
+    private final WalletSearchService walletSearchService;
+
     @Override
     public ResponseEntity<WalletResponse> getWallet() {
         UUID currentUserId = currentUserService.getCurrentUserId();
         log.info("Получение кошелька пользователя {}", currentUserId);
 
-        Wallet wallet = walletService.getUserWallet(currentUserId);
+        Wallet wallet = walletSearchService.getUserWallet(currentUserId);
         WalletResponse response = walletMapper.toApiResponse(wallet);
         return ResponseEntity.ok(response);
     }
@@ -44,7 +47,7 @@ public class WalletController implements WalletApi {
         UUID currentUserId = currentUserService.getCurrentUserId();
         log.info("Получение баланса пользователя {}", currentUserId);
 
-        BigDecimal balance = walletService.getUserWallet(currentUserId).getBalance();
+        BigDecimal balance = walletSearchService.getUserWallet(currentUserId).getBalance();
 
         BalanceResponse response = new BalanceResponse();
         response.setBalance(balance.doubleValue());

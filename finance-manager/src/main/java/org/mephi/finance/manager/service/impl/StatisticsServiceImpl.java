@@ -7,7 +7,7 @@ import org.mephi.finance.manager.domain.TransactionType;
 import org.mephi.finance.manager.domain.entity.Wallet;
 import org.mephi.finance.manager.domain.repository.TransactionRepository;
 import org.mephi.finance.manager.service.StatisticsService;
-import org.mephi.finance.manager.service.WalletService;
+import org.mephi.finance.manager.service.WalletSearchService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,14 +23,14 @@ import java.util.UUID;
 public class StatisticsServiceImpl implements StatisticsService {
 
     private final TransactionRepository transactionRepository;
-    private final WalletService walletService;
+    private final WalletSearchService walletSearchService;
 
     @Override
     @Transactional(readOnly = true)
     public Statistics getOverviewStatistics(UUID userId) {
         log.info("Получение общей статистики для пользователя: {}", userId);
 
-        Wallet userWallet = walletService.getUserWallet(userId);
+        Wallet userWallet = walletSearchService.getUserWallet(userId);
 
         BigDecimal totalIncome = getTotalAmountByType(userWallet.getId(), TransactionType.INCOME);
         BigDecimal totalExpenses = getTotalAmountByType(userWallet.getId(), TransactionType.EXPENSE);
