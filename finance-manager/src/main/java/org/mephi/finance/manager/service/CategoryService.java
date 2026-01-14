@@ -7,7 +7,6 @@ import org.mephi.finance.manager.dto.UpdateBudgetDto;
 import org.mephi.finance.manager.dto.UpdateCategoryDto;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 public interface CategoryService {
@@ -16,7 +15,6 @@ public interface CategoryService {
     void save(Category category);
     List<Category> getUserCategories(UUID userId);
     List<Category> getUserCategoriesByType(UUID userId, TransactionType type);
-    Optional<Category> findByNameAndUserIdAndType(String categoryName, UUID userId, TransactionType type);
     Category getCategoryById(UUID categoryId);
     Category updateCategory(UUID categoryId, UpdateCategoryDto updateDto);
     void deleteCategory(UUID categoryId, UUID userId);
