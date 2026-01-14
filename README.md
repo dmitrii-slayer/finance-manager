@@ -36,16 +36,12 @@ java -jar target/finance-manager-1.0-SNAPSHOT.jar
 mvn spring-boot:run
 ```
 
-4. Swagger UI:
-http://localhost:8080/finance/swagger-ui.html
-
 ---
 
 ## Описание API и примеры запросов
 
 ### Swagger UI:
-http://localhost:8080/finance/swagger-ui.html
-
+http://localhost:8080/finance/swagger-ui/index.html
 
 ---
 
