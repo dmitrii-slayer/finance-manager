@@ -1,0 +1,725 @@
+openapi: 3.0.3
+info:
+  title: Finance Manager API
+  description: API для управления личными финансами
+  version: 0.0.1
+
+servers:
+  - url: http://localhost:8080/finance
+
+tags:
+  - name: Authentication
+    description: Аутентификация
+  - name: Category
+    description: Категории
+  - name: Statistics
+    description: Статистика
+  - name: Transaction
+    description: Транзакции
+  - name: Wallet
+    description: Кошелек
+
+paths:
+  /auth/register:
+    post:
+      tags:
+        - Authentication
+      summary: Зарегистрировать нового пользователя
+      operationId: register
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+      responses:
+        '200':
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Username already exists
+
+  /auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: Войти под пользователем
+      operationId: login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /transactions/income:
+    post:
+      tags:
+        - Transaction
+      summary: Добавить доход
+      operationId: addIncomeTransaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionRequest'
+      responses:
+        '200':
+          description: Transaction added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionResponse'
+        '400':
+          description: Bad request
+        '404':
+          description: Category not found
+
+  /transactions/expense:
+    post:
+      tags:
+        - Transaction
+      summary: Добавить расход
+      operationId: addExpenseTransaction
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransactionRequest'
+      responses:
+        '200':
+          description: Transaction added successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionResponse'
+        '400':
+          description: Bad request
+        '404':
+          description: Category not found
+
+    get:
+      tags:
+        - Transaction
+      summary: Получить все транзакции
+      operationId: getTransactions
+      parameters:
+        - name: type
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/TransactionTypeEnum'
+          description: Фильтрация по типу категории (Расходы/Доход)
+        - name: category
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Фильтрация по имени категории
+      responses:
+        '200':
+          description: Transactions retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TransactionResponse'
+
+  /categories:
+    post:
+      tags:
+        - Category
+      summary: Добавить категорию
+      operationId: createCategory
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateCategoryRequest'
+      responses:
+        '200':
+          description: Category created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryDetailedResponse'
+        '400':
+          description: Bad request
+        '409':
+          description: Category already exists
+
+    get:
+      tags:
+        - Category
+      summary: Получить все категории
+      operationId: getUserCategories
+      parameters:
+        - name: type
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/TransactionTypeEnum'
+          description: Фильтрация по типу категории (Расходы/Доход)
+      responses:
+        '200':
+          description: Categories retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CategoryResponse'
+
+  /categories/{categoryId}:
+    get:
+      tags:
+        - Category
+      summary: Получить категорию по ID
+      operationId: getCategoryById
+      parameters:
+        - name: categoryId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Category retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryDetailedResponse'
+        '404':
+          description: Category not found
+
+    put:
+      tags:
+        - Category
+      summary: Обновить категорию
+      operationId: updateCategory
+      parameters:
+        - name: categoryId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateCategoryRequest'
+      responses:
+        '200':
+          description: Category updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryDetailedResponse'
+        '400':
+          description: Bad request
+        '404':
+          description: Category not found
+
+    delete:
+      tags:
+        - Category
+      summary: Удалить категорию
+      operationId: deleteCategory
+      parameters:
+        - name: categoryId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Category deleted successfully
+        '404':
+          description: Category not found
+
+  /categories/{categoryId}/budget:
+    put:
+      tags:
+        - Category
+      summary: Установить бюджет для категории
+      operationId: setCategoryBudget
+      parameters:
+        - name: categoryId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBudgetRequest'
+      responses:
+        '200':
+          description: Budget set successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryDetailedResponse'
+        '400':
+          description: Bad request
+        '404':
+          description: Category not found
+
+
+  /wallet:
+    get:
+      tags:
+        - Wallet
+      summary: Просмотр кошелька
+      operationId: getWallet
+      responses:
+        '200':
+          description: Wallet retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletResponse'
+
+  /wallet/balance:
+    get:
+      tags:
+        - Wallet
+      summary: Просмотр текущего баланса
+      operationId: getBalance
+      responses:
+        '200':
+          description: Balance retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BalanceResponse'
+
+  /wallet/transfer:
+    post:
+      tags:
+        - Wallet
+      summary: Перевести деньги другому пользователю
+      operationId: transferToUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferRequest'
+      responses:
+        '200':
+          description: Transfer completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransferResponse'
+        '400':
+          description: Bad request
+        '404':
+          description: Recipient not found
+
+  /statistics/overview:
+    get:
+      tags:
+        - Statistics
+      summary: Просмотр общей статистики
+      operationId: getOverview
+      responses:
+        '200':
+          description: Statistics retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StatisticsResponse'
+
+components:
+  schemas:
+    RegisterRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          minLength: 3
+          maxLength: 50
+          example: "my_username"
+        password:
+          type: string
+          minLength: 6
+          example: "password123"
+
+    LoginRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          example: "my_username"
+        password:
+          type: string
+          example: "password123"
+
+    TransactionRequest:
+      type: object
+      required:
+        - categoryName
+        - amount
+      properties:
+        categoryName:
+          type: string
+          example: "Еда"
+        amount:
+          type: number
+          format: double
+          minimum: 0.01
+          example: 1500.50
+        description:
+          type: string
+          example: "Groceries for the week"
+
+    CreateBudgetRequest:
+      type: object
+      required:
+        - categoryName
+        - limitAmount
+      properties:
+        categoryId:
+          type: string
+          format: uuid
+          example: "dc42f455-b310-48ec-8e61-c4d7be23c39e"
+        limitAmount:
+          type: number
+          format: double
+          minimum: 0.01
+          example: 3000.0
+        period:
+          $ref: '#/components/schemas/BudgetPeriodEnum'
+          default: "MONTHLY"
+
+    UpdateBudgetRequest:
+      type: object
+      required:
+        - limitAmount
+      properties:
+        limitAmount:
+          type: number
+          format: double
+          minimum: 0.01
+          example: 3000.0
+        period:
+          $ref: '#/components/schemas/BudgetPeriodEnum'
+          default: "MONTHLY"
+
+    CreateCategoryRequest:
+      type: object
+      required:
+        - name
+        - type
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: "Транспорт"
+        type:
+          $ref: '#/components/schemas/TransactionTypeEnum'
+          
+    UpdateCategoryRequest:
+      type: object
+      required:
+        - name
+        - type
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+          example: "Транспорт"
+
+    TransferRequest:
+      type: object
+      required:
+        - targetUsername
+        - amount
+      properties:
+        targetUsername:
+          type: string
+          example: "some_user"
+        amount:
+          type: number
+          format: double
+          minimum: 0.01
+          example: 1000.0
+        description:
+          type: string
+          example: "Пицца"
+
+    AuthResponse:
+      type: object
+      properties:
+        token:
+          type: string
+          description: JWT token for authentication
+          example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+        username:
+          type: string
+          example: "my_username"
+        message:
+          type: string
+          example: "Login successful"
+
+    TransactionResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        categoryName:
+          type: string
+          example: "Еда"
+        amount:
+          type: number
+          format: double
+          example: 1500.50
+        description:
+          type: string
+          example: "Продукты на неделю"
+        type:
+          $ref: '#/components/schemas/TransactionTypeEnum'
+        timestamp:
+          type: string
+          format: date-time
+          example: "2023-10-05T14:30:00Z"
+
+    BudgetResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "223e4567-e89b-12d3-a456-426614174000"
+        categoryName:
+          type: string
+          example: "Развлечения"
+        limitAmount:
+          type: number
+          format: double
+          example: 3000.0
+        spentAmount:
+          type: number
+          format: double
+          example: 1200.0
+        remainingAmount:
+          type: number
+          format: double
+          example: 1800.0
+        period:
+          $ref: '#/components/schemas/BudgetPeriodEnum'
+        isExceeded:
+          type: boolean
+          example: false
+
+    CategoryResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "323e4567-e89b-12d3-a456-426614174000"
+        name:
+          type: string
+          example: "Транспорт"
+        type:
+          $ref: '#/components/schemas/TransactionTypeEnum'
+
+    CategoryDetailedResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "323e4567-e89b-12d3-a456-426614174000"
+        userId:
+          type: string
+          format: uuid
+          example: 4c15813d-e477-4283-bac4-e67f1f87d3fe
+        name:
+          type: string
+          example: "Транспорт"
+        type:
+          $ref: '#/components/schemas/TransactionTypeEnum'
+        budgetLimit:
+          type: number
+          format: double
+        budgetSpent:
+          type: number
+          format: double
+        remainingBudget:
+          type: number
+          format: double
+        budgetPeriod:
+          $ref: '#/components/schemas/BudgetPeriodEnum'
+        isBudgetExceeded:
+          type: boolean
+
+    WalletResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "423e4567-e89b-12d3-a456-426614174000"
+        balance:
+          type: number
+          format: double
+          example: 15000.50
+        createdAt:
+          type: string
+          format: date-time
+          example: "2023-10-01T10:00:00Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2023-10-05T15:30:00Z"
+
+    TransferResponse:
+      type: object
+      properties:
+        transactionId:
+          type: string
+          format: uuid
+          example: "523e4567-e89b-12d3-a456-426614174000"
+        fromUsername:
+          type: string
+          example: "my_username"
+        toUsername:
+          type: string
+          example: "some_user"
+        amount:
+          type: number
+          format: double
+          example: 1000.0
+        description:
+          type: string
+          example: "Пицца"
+        timestamp:
+          type: string
+          format: date-time
+          example: "2023-10-05T16:45:00Z"
+
+    StatisticsResponse:
+      type: object
+      properties:
+        totalIncome:
+          type: number
+          format: double
+          example: 63000.0
+        totalExpenses:
+          type: number
+          format: double
+          example: 8300.0
+        balance:
+          type: number
+          format: double
+          example: 54700.0
+        incomeByCategory:
+          type: object
+          additionalProperties:
+            type: number
+            format: double
+          example:
+            Salary: 60000.0
+            Bonus: 3000.0
+        expensesByCategory:
+          type: object
+          additionalProperties:
+            type: number
+            format: double
+          example:
+            Еда: 800.0
+            Развлечения: 3000.0
+
+    BalanceResponse:
+      type: object
+      properties:
+        balance:
+          type: number
+          format: double
+          example: 10000.0
+
+    ErrorResponse:
+      type: object
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          example: "2023-10-05T14:30:00Z"
+        status:
+          type: integer
+          example: 400
+        error:
+          type: string
+          example: "Bad Request"
+        message:
+          type: string
+          example: "Invalid input data"
+        path:
+          type: string
+          example: "/api/transactions"
+
+    TransactionTypeEnum:
+      type: string
+      enum: [EXPENSE, INCOME]
+
+    BudgetPeriodEnum:
+      type: string
+      enum: [MONTHLY, WEEKLY, YEARLY]
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+security:
+  - bearerAuth: []
