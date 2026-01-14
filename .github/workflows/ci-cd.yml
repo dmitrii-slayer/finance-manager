@@ -24,4 +24,4 @@ jobs:
         run: mvn clean verify -U -ntp
 
       - name: Проверка code style
-        run: mvn spotless:check
+        run: cd finance-manager && mvn spotless:check
