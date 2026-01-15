@@ -76,6 +76,35 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /transactions:
+    get:
+      tags:
+        - Transaction
+      summary: Получить все транзакции
+      operationId: getTransactions
+      parameters:
+        - name: type
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/TransactionTypeEnum'
+          description: Фильтрация по типу категории (Расходы/Доход)
+        - name: category
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Фильтрация по имени категории
+      responses:
+        '200':
+          description: Transactions retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TransactionResponse'
+
   /transactions/income:
     post:
       tags:
@@ -123,34 +152,6 @@ paths:
           description: Bad request
         '404':
           description: Category not found
-
-    get:
-      tags:
-        - Transaction
-      summary: Получить все транзакции
-      operationId: getTransactions
-      parameters:
-        - name: type
-          in: query
-          required: false
-          schema:
-            $ref: '#/components/schemas/TransactionTypeEnum'
-          description: Фильтрация по типу категории (Расходы/Доход)
-        - name: category
-          in: query
-          required: false
-          schema:
-            type: string
-          description: Фильтрация по имени категории
-      responses:
-        '200':
-          description: Transactions retrieved successfully
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/TransactionResponse'
 
   /categories:
     post:
